@@ -62,6 +62,11 @@ Default: 1.0 millimeter
 
 Defines the minimum distance that the extruder head has to travel from the end of one thread to the beginning of another, in order to trigger the extruder retraction.  Setting this to a high value means the extruder will retract only occasionally, setting it to a low value means the extruder will retract most of the time.
 
+===Z Distance Multiplier===
+Default: 10
+
+Defines the multiplier that is applied to the Z distance when calculating a distance to compare with the Minimum Travel for Retraction. This is set to a large value to force Filament Retraction before a layer change. Dual Extrusion inserts tool switches on a layer change, so this should prevent filament oozing out of the extruder which is currently inactive. It can be set to 1 if you never use Dual Extrusion.
+
 ===Retract Within Island===
 Default is off.
 
