@@ -215,7 +215,7 @@ def getReplaceableExportGcode(nameOfReplaceFile, replaceableExportGcode):
 	if len(replaceLines) < 1:
 		return replaceableExportGcode
 	for replaceLine in replaceLines:
-		splitLine = replaceLine.replace('\\n', '\t').split('\t')
+		splitLine = replaceLine.replace('\n', '\t').split('\t')
 		if len(splitLine) > 0:
 			replaceableExportGcode = replaceableExportGcode.replace(splitLine[0], '\n'.join(splitLine[1 :]))
 	output = cStringIO.StringIO()
