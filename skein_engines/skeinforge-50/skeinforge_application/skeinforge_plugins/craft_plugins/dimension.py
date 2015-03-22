@@ -191,6 +191,7 @@ class DimensionSkein:
 		self.totalExtrusionDistance = 0.0
 		self.travelFeedRatePerSecond = None
 		self.zDistanceRatio = 5.0
+		self.EarlyShutdownActive = False
 
 	def addLinearMoveExtrusionDistanceLine(self, extrusionDistance):
 		'Get the extrusion distance string from the extrusion distance.'
@@ -389,9 +390,18 @@ class DimensionSkein:
 					self.distanceFeedRate.addLine('G92 E0')
 					self.totalExtrusionDistance = 0.0
 			self.isExtruderActive = True
-		elif firstWord == 'M103':
+		elif firstWord == '(<EarlyShutdownActive>)':
+			self.EarlyShutdownActive = True
+		elif firstWord == 'M103' and not self.EarlyShutdownActive:
 			self.retractionRatio = self.getRetractionRatio(lineIndex)
 			self.addLinearMoveExtrusionDistanceLine(-self.repository.retractionDistance.value * self.retractionRatio)
+			self.isExtruderActive = False
+		elif firstWord == '(<EarlyShutdownFinished>)':
+			self.EarlyShutdownActive = False
+			self.retractionRatio = self.getRetractionRatio(lineIndex)
+			self.distanceFeedRate.addLine('M101')
+			self.addLinearMoveExtrusionDistanceLine(-self.repository.retractionDistance.value * self.retractionRatio)
+			self.distanceFeedRate.addLine('M103')
 			self.isExtruderActive = False
 		elif firstWord == 'M108':
 			self.flowRate = float( splitLine[1][1 :] )

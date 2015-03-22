@@ -153,6 +153,7 @@ class OozebaneSkein:
 		self.operatingFeedRateMinute = 959.0
 		self.shutdownStepIndex = 999999999
 		self.startupStepIndex = 999999999
+		self.EarlyShutdownActive = False
 
 	def addAfterStartupLine( self, splitLine ):
 		"Add the after startup lines."
@@ -249,6 +250,8 @@ class OozebaneSkein:
 			if not self.isCloseToEither( locationBack, location, self.oldLocation ):
 				line = self.getLinearMoveWithFeedRate( self.feedRateMinute, locationBack )
 			self.distanceFeedRate.addLine(line)
+			self.distanceFeedRate.addLine("(<EarlyShutdownActive>)")
+			self.EarlyShutdownActive = True
 			self.addLineSetShutdowns('M103')
 			return True
 		if self.isClose( locationBack, self.oldLocation ):
@@ -264,6 +267,9 @@ class OozebaneSkein:
 		"Get and / or add the shutdown and slowdown lines."
 		while self.getAddShutSlowDownLine(line):
 			self.shutdownStepIndex += 1
+		if self.EarlyShutdownActive:
+			self.distanceFeedRate.addLine("(<EarlyShutdownFinished>)")
+			self.EarlyShutdownActive = False
 		return ''
 
 	def getCraftedGcode( self, gcodeText, oozebaneRepository ):
