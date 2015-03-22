@@ -28,7 +28,7 @@ import math
 import os
 import sys
 import traceback
-
+import inspect
 
 __author__ = 'Enrique Perez (perez_enrique@yahoo.com)'
 __date__ = '$Date: 2008/21/04 $'
@@ -385,6 +385,13 @@ class DistanceFeedRate:
 	def addTagBracketedProcedure(self, procedure):
 		'Add a begin procedure tag, procedure and end procedure tag.'
 		self.addLine(getTagBracketedProcedure(procedure))
+
+	def addTraceLine(self, string):
+		caller = inspect.getframeinfo(inspect.currentframe().f_back)
+		longFileName = str(caller[0])
+		i = max(longFileName.rfind("/"), longFileName.rfind("\\")) + 1
+		self.addLine("(<trace> " + longFileName[i:] + " line " + str(caller[1])
+			   + ": " + string + ")")
 
 	def getBoundaryLine(self, location):
 		'Get boundary gcode line.'
