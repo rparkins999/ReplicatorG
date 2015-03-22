@@ -923,7 +923,10 @@ class RaftSkein:
 			elif firstWord == '(<objectNextLayersTemperature>':
 				self.objectNextLayersTemperature = float(splitLine[1])
 			elif firstWord == '(<orbitalFeedRatePerSecond>':
-				self.orbitalFeedRatePerSecond = float(splitLine[1])
+				if float(splitLine[1]) == 0.0:
+					self.orbitalFeedRatePerSecond = 2.01
+				else:
+					self.orbitalFeedRatePerSecond = float(splitLine[1])
 			elif firstWord == '(<operatingFeedRatePerSecond>':
 				self.operatingFeedRateMinute = 60.0 * float(splitLine[1])
 				self.feedRateMinute = self.operatingFeedRateMinute
