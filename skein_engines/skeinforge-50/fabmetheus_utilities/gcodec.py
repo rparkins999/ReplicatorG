@@ -388,9 +388,8 @@ class DistanceFeedRate:
 
 	def addTraceLine(self, string):
 		caller = inspect.getframeinfo(inspect.currentframe().f_back)
-		longFileName = str(caller[0])
-		i = max(longFileName.rfind("/"), longFileName.rfind("\\")) + 1
-		self.addLine("(<trace> " + longFileName[i:] + " line " + str(caller[1])
+		leafName = os.path.basename(str(caller[0]))
+		self.addLine("(<trace> " + leafName + " line " + str(caller[1])
 			   + ": " + string + ")")
 
 	def getBoundaryLine(self, location):
