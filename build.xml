@@ -1,4 +1,6 @@
 ﻿<project name="ReplicatorG" basedir="." default="help">
+	<!-- This really should be synchronised with the version in Base.java. -->
+	<property name="replicatorg.version" value="0041beta" />
 
 	<!-- Project name -->
 
