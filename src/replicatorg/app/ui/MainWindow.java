@@ -298,7 +298,6 @@ ToolpathGenerator.GeneratorListener
 
 	public MainWindow() {
 		super(WINDOW_TITLE);
-		setLocationByPlatform(true);
 		MRJApplicationUtils.registerAboutHandler(this);
 		MRJApplicationUtils.registerPrefsHandler(this);
 		MRJApplicationUtils.registerQuitHandler(this);
@@ -392,9 +391,7 @@ ToolpathGenerator.GeneratorListener
 			splitPane.setDividerSize(dividerSize);
 		}
 
-		splitPane.setPreferredSize(new Dimension(600,600));
 		pane.add(splitPane,"growx,growy,shrinkx,shrinky");
-		pack();
 
 		//		textarea.setTransferHandler(new TransferHandler() {
 		//			private static final long serialVersionUID = 2093323078348794384L;
@@ -470,6 +467,11 @@ ToolpathGenerator.GeneratorListener
 		if (Base.openedAtStartup != null) {
 			handleOpen2(Base.openedAtStartup);
 		} else {
+			int width =
+				Base.preferences.getInt("replicatorg.last.window.width", 600);
+			int height =
+				Base.preferences.getInt("replicatorg.last.window.height", 600);
+			setSize(width, height);
 			// last sketch that was in use, or used to launch the app
 			final String prefName = "replicatorg.initialopenbehavior";
 			int ordinal = Base.preferences.getInt(prefName, InitialOpenBehavior.OPEN_LAST.ordinal());
@@ -549,10 +551,8 @@ ToolpathGenerator.GeneratorListener
 
 		// window location information
 		Rectangle bounds = getBounds();
-		Base.preferences.putInt("last.window.x", bounds.x);
-		Base.preferences.putInt("last.window.y", bounds.y);
-		Base.preferences.putInt("last.window.width", bounds.width);
-		Base.preferences.putInt("last.window.height", bounds.height);
+		Base.preferences.putInt("replicatorg.last.window.width", bounds.width);
+		Base.preferences.putInt("replicatorg.last.window.height", bounds.height);
 
 		// last sketch that was in use
 		// Preferences.set("last.sketch.name", sketchName);
@@ -3190,7 +3190,7 @@ ToolpathGenerator.GeneratorListener
 	 * Clean up files and store UI preferences on shutdown.  This is called by
 	 * the shutdown hook and will be run in virtually all shutdown scenarios.
 	 * Because it is used in a shutdown hook, there is no reason to call this
-	 * method explicit.y
+	 * method explicitly
 	 */
 	public void onShutdown() {
 

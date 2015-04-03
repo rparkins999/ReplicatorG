@@ -673,7 +673,12 @@ public class Base {
 				
 				editor.loadMachine(machineName, autoconnect);
 				
-				// show the window
+				// show the window ...
+				// The following is a horrible hack, but setLocationByPlatform
+				// doesn't work without it.
+				editor.setVisible(true);
+				editor.setVisible(false);
+				editor.setLocationByPlatform(true);
 				editor.setVisible(true);
 				checkDirectories();
 				UpdateChecker.checkLatestVersion(editor);
