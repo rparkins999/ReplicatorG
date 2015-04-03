@@ -58,13 +58,16 @@ public class PreferencesWindow extends JFrame implements GuiConstants {
 	// the calling editor, so updates can be applied
 	MainWindow editor;
 
-	JFormattedTextField fontSizeField;
+	JFormattedTextField editorFontSizeField;
+	JFormattedTextField consoleFontSizeField;
 	JTextField firmwareUpdateUrlField;
 	JTextField logPathField;
 	
 	private void showCurrentSettings() {		
 		Font editorFont = Base.getFontPref("editor.font","Monospaced,plain,12");
-		fontSizeField.setText(String.valueOf(editorFont.getSize()));
+		editorFontSizeField.setText(String.valueOf(editorFont.getSize()));
+		Font consoleFont = Base.getFontPref("console.font","Monospaced,plain,11");
+		consoleFontSizeField.setText(String.valueOf(consoleFont.getSize()));
 		String firmwareUrl = Base.preferences.get("replicatorg.updates.url", FirmwareUploader.DEFAULT_UPDATES_URL);
 		firmwareUpdateUrlField.setText(firmwareUrl);
 		String logPath = Base.preferences.get("replicatorg.logpath", "");
@@ -184,11 +187,15 @@ public class PreferencesWindow extends JFrame implements GuiConstants {
 		Container content = basic;
 		content.setLayout(new MigLayout("fill"));
 
-		content.add(new JLabel("MainWindow font size: "), "split");
-		fontSizeField = new JFormattedTextField(Base.getLocalFormat());
-		fontSizeField.setColumns(4);
-		content.add(fontSizeField);
-		content.add(new JLabel("  (requires restart of ReplicatorG)"), "wrap");
+		content.add(new JLabel("gcode window font size: "), "split");
+		editorFontSizeField = new JFormattedTextField(Base.getLocalFormat());
+		editorFontSizeField.setColumns(4);
+		content.add(editorFontSizeField, "wrap");
+
+		content.add(new JLabel("Console window font size: "), "split");
+		consoleFontSizeField = new JFormattedTextField(Base.getLocalFormat());
+		consoleFontSizeField.setColumns(4);
+		content.add(consoleFontSizeField, "wrap");
 
 		boolean checkTempDuringBuild = Base.preferences.getBoolean("build.monitor_temp", true);
 		boolean displaySpeedWarning = Base.preferences.getBoolean("build.speed_warning", true);
@@ -531,7 +538,7 @@ public class PreferencesWindow extends JFrame implements GuiConstants {
 	 */
 	public void applyFrame() {
 		// put each of the settings into the table
-		String newSizeText = fontSizeField.getText();
+		String newSizeText = editorFontSizeField.getText();
 		try {
 			int newSize = Integer.parseInt(newSizeText.trim());
 			String fontName = Base.preferences.get("editor.font","Monospaced,plain,12");
@@ -544,6 +551,24 @@ public class PreferencesWindow extends JFrame implements GuiConstants {
 					buf.append(piece);
 				}
 				Base.preferences.put("editor.font", buf.toString());
+			}
+
+		} catch (Exception e) {
+			Base.logger.warning("ignoring invalid font size " + newSizeText);
+		}
+		newSizeText = consoleFontSizeField.getText();
+		try {
+			int newSize = Integer.parseInt(newSizeText.trim());
+			String fontName = Base.preferences.get("console.font","Monospaced,plain,11");
+			if (fontName != null) {
+				String pieces[] = fontName.split(",");
+				pieces[2] = String.valueOf(newSize);
+				StringBuffer buf = new StringBuffer();
+				for (String piece : pieces) {
+					if (buf.length() > 0) buf.append(",");
+					buf.append(piece);
+				}
+				Base.preferences.put("console.font", buf.toString());
 			}
 
 		} catch (Exception e) {
