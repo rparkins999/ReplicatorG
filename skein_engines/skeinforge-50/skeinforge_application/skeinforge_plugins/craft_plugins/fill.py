@@ -867,6 +867,12 @@ class FillSkein:
 		self.isJunctionWide = True
 		surroundingCarves = []
 		self.distanceFeedRate.addLine('(<layer> %s )' % rotatedLayer.z)
+		if layerIndex == 0:
+			self.distanceFeedRate.addLine('(<alterationDeleteThisPrefix/>)M104'
+			+ ' S<setting.temperature.objectFirstLayerInfillTemperature>')
+		else:
+			self.distanceFeedRate.addLine('(<alterationDeleteThisPrefix/>)M104'
+			+ ' S<setting.temperature.objectNextLayersTemperature>')
 		if layerRemainder >= int(round(self.repository.diaphragmThickness.value)):
 			for surroundingIndex in xrange(1, self.solidSurfaceThickness + 1):
 				self.addRotatedCarve(layerIndex, -surroundingIndex, reverseRotation, surroundingCarves)
