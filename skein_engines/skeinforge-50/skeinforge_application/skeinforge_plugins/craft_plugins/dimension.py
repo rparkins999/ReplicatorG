@@ -165,7 +165,7 @@ class DimensionRepository:
 		self.filamentDiameter = settings.FloatSpin().getFromValue(1.0, 'Filament Diameter (mm):', self, 6.0, 2.8)
 		self.filamentPackingDensity = settings.FloatSpin().getFromValue(0.7, 'Filament Packing Density (ratio):', self, 1.0, 0.85)
 		settings.LabelSeparator().getFromRepository(self)
-		#self.maximumEValueBeforeReset = settings.FloatSpin().getFromValue(0.0, 'Maximum E Value before Reset (float):', self, 999999.9, 91234.0)
+		self.maximumEValueBeforeReset = settings.FloatSpin().getFromValue(0.0, 'Maximum E Value before Reset (float):', self, 999999.9, 91234.0)
 		self.minimumTravelForRetraction = settings.FloatSpin().getFromValue(0.0, 'Minimum Travel for Retraction (millimeters):', self, 2.0, 1.0)
 		self.zDistanceRatio = settings.FloatSpin().getFromValue( 1.0, 'Z Distance Multiplier:', self, 20.0, 10.0 )
 		self.retractWithinIsland = settings.BooleanSetting().getFromValue('Retract Within Island', self, False)
@@ -389,7 +389,8 @@ class DimensionSkein:
 			self.layerIndex += 1
 			settings.printProgress(self.layerIndex, 'dimension')
 		elif firstWord == 'M101':
-			self.addLinearMoveExtrusionDistanceLine(self.restartDistance * self.retractionRatio)
+			if self.totalExtrusionDistance > 0.0:
+				self.addLinearMoveExtrusionDistanceLine(self.restartDistance * self.retractionRatio)
 			if self.totalExtrusionDistance > self.repository.maximumEValueBeforeReset.value: 
 				if not self.repository.relativeExtrusionDistance.value:
 					self.distanceFeedRate.addLine('G92 E0')
