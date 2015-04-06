@@ -96,8 +96,6 @@ public class DualStrusionWindow extends JFrame{
 	File rightStl = null;
 	File leftGcode = null;
 	File rightGcode = null;
-	MutableGCodeSource startSource;
-	MutableGCodeSource endSource;
 
 	boolean failure = false;
 	JLabel failureLabel = new JLabel();
@@ -114,9 +112,9 @@ public class DualStrusionWindow extends JFrame{
 	 * 
 	 * This is the default constructor, it is only invoked if the ReplicatorG window did not already have a piece of gcode open
 	 */
-	public DualStrusionWindow(MachineType type, MutableGCodeSource startCode, MutableGCodeSource endCode)
+	public DualStrusionWindow(MachineType type)
 	{
-		this(type, startCode, endCode, null);
+		this(type, null);
 	}
 	
 	/**
@@ -127,13 +125,11 @@ public class DualStrusionWindow extends JFrame{
 	 * This is a constructor that takes the filepath of the gcode open currently in ReplicatorG
 	 * @param s the path of the gcode currently open in RepG
 	 */
-	public DualStrusionWindow(MachineType type, MutableGCodeSource startCode, MutableGCodeSource endCode, String path) {
+	public DualStrusionWindow(MachineType type, String path) {
 		super("DualStrusion Window");
 
 		Base.logger.log(Level.FINE, "Dualstrusion window booting up...");
 		
-		startSource = startCode;
-		endSource = endCode;
 		this.type = type;
 		
 		panels = new JPanel(new CardLayout());
@@ -463,14 +459,22 @@ public class DualStrusionWindow extends JFrame{
 					if("Config Done".equals(evt.getMessage()) &&
 						(!((SkeinforgeGenerator)evt.getSource()).configSuccess))
 					{
+							System.err.println("DualStrusionWindow 466 aborting");
 							abort("Skeinforge generation canceled.");
 					}
 				}
 
 				@Override
 				public void generationComplete(GeneratorEvent evt) {
-					if(evt.getCompletion() == Completion.FAILURE || failure)
+					if (evt.getCompletion() == Completion.FAILURE)
 					{
+						System.err.println("DualStrusionWindow 471 aborting");
+						abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
+						return;
+					}
+					else if (failure)
+					{
+						System.err.println("DualStrusionWindow 477 aborting");
 						abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
 						return;
 					}
@@ -531,7 +535,7 @@ public class DualStrusionWindow extends JFrame{
 			return;
 		}
 		
-		DualStrusionConstruction dsConstruction = new DualStrusionConstruction(leftGcode, rightGcode, startSource, endSource, type, uWipe);
+		DualStrusionConstruction dsConstruction = new DualStrusionConstruction(leftGcode, rightGcode, type, uWipe);
 		dsConstruction.combine();
 		dsConstruction.getCombinedFile().writeToFile(dest);
 		

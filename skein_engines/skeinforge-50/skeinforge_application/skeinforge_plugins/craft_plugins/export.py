@@ -466,7 +466,7 @@ class ExportSkein:
 			if not self.repository.deleteKeepComments.value:
 				self.addLine(line)
 			return
-		if firstWord == '(<layer>' or firstWord == '(</layer>)':
+		if firstWord == '(<layer>' or firstWord.find('(</layer>') == 0:
 			if not self.repository.deleteLayerComments.value:
 				self.addLine(line)
 			return

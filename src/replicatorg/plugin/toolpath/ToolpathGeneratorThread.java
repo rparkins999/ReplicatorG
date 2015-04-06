@@ -123,17 +123,17 @@ public class ToolpathGeneratorThread extends Thread {
 
 		try {
 			BuildCode code = generator.generateToolpath();
-			//Base.logger.severe("Toolpath generation POST generateToolpath!");
+			Base.logger.severe("Toolpath generation POST generateToolpath!");
 			if (code != null) {
 				build.reloadCode();
+				Base.logger.severe("Toolpath generation complete!");
 				generator.emitCompletion(GeneratorListener.Completion.SUCCESS);
-				//Base.logger.severe("Toolpath generation complete!");
 			} else {
+				Base.logger.severe("Toolpath generation failed!" + code);
 				generator.emitCompletion(GeneratorListener.Completion.FAILURE);
-				//Base.logger.severe("Toolpath generation failed!" + code);
 			}
 		} catch (Exception e) {
-			//Base.logger.severe("Toolpath generation failed!" + e);
+			Base.logger.severe("Toolpath generation failed!" + e);
 			generator.emitCompletion(GeneratorListener.Completion.FAILURE);
 		} finally {
 			if (progressDialog != null) {

@@ -248,7 +248,7 @@ ToolpathGenerator.GeneratorListener
 //	JMenuItem editStartItem;
 //	JMenuItem editEndItem;
 	JMenu changeToolheadMenu = new JMenu("Swap Toolhead in .gcode");
-
+	
 	JMenu machineMenu;
 	MachineMenuListener machineMenuListener;
 	SerialMenuListener serialMenuListener;
@@ -2730,15 +2730,10 @@ ToolpathGenerator.GeneratorListener
 			
 			// this is stuff that DualStrusionConstruction needs, and until there's a better way to get it there...
 			MachineType type = machineLoader.getMachineInterface().getMachineType();
-			MutableGCodeSource startCode = 
-					new MutableGCodeSource(machineLoader.getMachineInterface().getModel().getDualstartBookendCode());
-			MutableGCodeSource endCode = 
-					new MutableGCodeSource(machineLoader.getMachineInterface().getModel().getEndBookendCode());
-			
 			if(getBuild().getCode() != null)
-				dsw = new DualStrusionWindow(type, startCode, endCode, getBuild().getMainFilePath());
+				dsw = new DualStrusionWindow(type, getBuild().getMainFilePath());
 			else
-				dsw = new DualStrusionWindow(type, startCode, endCode);
+				dsw = new DualStrusionWindow(type);
 			dsw.setVisible(true);
 		}
 
