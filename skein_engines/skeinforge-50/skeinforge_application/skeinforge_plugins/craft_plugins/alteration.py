@@ -84,6 +84,7 @@ from skeinforge_application.skeinforge_utilities import skeinforge_polyfile
 from skeinforge_application.skeinforge_utilities import skeinforge_profile
 import cStringIO
 import sys
+import time
 
 
 __author__ = 'Enrique Perez (perez_enrique@yahoo.com)'
@@ -178,11 +179,14 @@ class AlterationSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		if repository.replaceVariableWithSetting.value:
 			self.setSettingDictionary()
+		self.distanceFeedRate.addLine('(generated ' +  time.ctime() + ' using profile ' +  skeinforge_profile.getProfileName(skeinforge_profile.getCraftTypeName()) + ')')
+		print('Using start file ' + repository.nameOfStartFile.value)
 		self.addFromUpperLowerFile(repository.nameOfStartFile.value) # Add a start file if it exists.
 		self.parseInitialization()
 		for self.lineIndex in xrange(self.lineIndex, len(self.lines)):
 			line = self.lines[self.lineIndex]
 			self.distanceFeedRate.addLine(line)
+		print('Using end file ' + repository.nameOfEndFile.value)
 		self.addFromUpperLowerFile(repository.nameOfEndFile.value) # Add an end file if it exists.
 		gcodeText = self.getReplacedAlterationText()
 		if repository.removeRedundantMcode.value:
