@@ -261,7 +261,8 @@ public class DualStrusionConstruction
 				result.addAll(wipe(rightWipe));
 		}
 		
-		result.add(toTool.getRecallOffsetGcodeCommand());
+		// Offets deprecated nowadays
+		//result.add(toTool.getRecallOffsetGcodeCommand());
 		result.add("M108 "+toTool.getTcode() + " (Set tool)");
 		
 		// Ben's suggestion
