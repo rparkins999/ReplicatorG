@@ -25,7 +25,6 @@ public class AdvancedPrefs extends JFrame {
 	private int rightWidth;
 	private int rowCount;
 	private JTable prefsDisplay = new JTable();
-	private JScrollPane scrollPane;
 
 	public AdvancedPrefs()
 	{
@@ -53,11 +52,7 @@ public class AdvancedPrefs extends JFrame {
 		Dimension size = new Dimension(leftWidth * 2, height);
 		prefsDisplay.setPreferredScrollableViewportSize(size);
 		prefsDisplay.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		scrollPane = new JScrollPane(prefsDisplay);
-		//size = scrollPane.getPreferredSize();
-		//size.width = leftWidth * 2;
-		//scrollPane.setMaximumSize(size);
-		content.add(scrollPane);
+		content.add(new JScrollPane(prefsDisplay));
 		pack();
 	}
 	
