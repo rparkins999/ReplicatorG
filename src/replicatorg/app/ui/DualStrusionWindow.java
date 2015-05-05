@@ -45,6 +45,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -199,20 +200,20 @@ public class DualStrusionWindow extends JFrame{
 					rightToolhead.setText(s);
 			}
 		});
-//		JButton switchItem = new JButton("Switch Toolheads"); //This button switches the contents of the two text fields in order to easily swap Primary and Secondary Toolheads
-//		switchItem.addActionListener(new ActionListener()
-//		{
-//			public void actionPerformed(ActionEvent arg0) {
-//				String temp = leftToolhead.getText();
-//				leftToolhead.setText(rightToolhead.getText());
-//				rightToolhead.setText(temp);
-//
-//			}
-//		});
-//		panel.add(switchItem, "wrap");
-		panel.add(new JLabel("Right Extruder"), "split");
-		panel.add(rightToolhead,"split, growx");
-		panel.add(rightChooserButton, "wrap");
+        panel.add(new JLabel("Right Extruder"), "split");
+        panel.add(rightToolhead,"split, growx");
+        panel.add(rightChooserButton, "wrap");
+
+        final String pref = new String("dualstrusionwindow.pauseonchange");
+		JCheckBox cb = new JCheckBox("Pause when changing tool");
+		cb.setSelected(Base.preferences.getBoolean(pref, false));
+        cb.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JCheckBox box = (JCheckBox)e.getSource();
+                Base.preferences.putBoolean(pref, box.isSelected());
+            }
+        });
+        panel.add(cb, "wrap");
 
 		final JTextField destinationTextField = new JTextField(50);
 		destinationTextField.setText(Base.preferences.get("dualstrusionwindow.destfile", ""));
@@ -352,11 +353,15 @@ public class DualStrusionWindow extends JFrame{
 				if(leftStl != null)
 				{
 					leftGcode = new File(replaceExtension(leftStl.getAbsolutePath(), "gcode"));
+					Base.logger.log(Level.SEVERE,
+						"Starting stlToGcode(LEFT)\n");
 					stlToGcode(leftStl, leftGcode, ToolheadAlias.LEFT, DualStrusionWindow.this.type);
 				}
 				if(rightStl != null)
 				{
 					rightGcode = new File(replaceExtension(rightStl.getAbsolutePath(), "gcode"));
+					Base.logger.log(Level.SEVERE,
+						"Starting stlToGcode(RIGHT)\n");
 					stlToGcode(rightStl, rightGcode, ToolheadAlias.RIGHT, DualStrusionWindow.this.type);
 				}
 

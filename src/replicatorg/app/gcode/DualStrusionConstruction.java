@@ -39,6 +39,7 @@ public class DualStrusionConstruction
 	private final WipeModel leftWipe;
 	private final WipeModel rightWipe;
 	private final MachineType machineType;
+    private final boolean pauseOnChange;
 	private MutableGCodeSource  result;
 	/* If we see no comments before the first <layer>, we assume that we're
 	 * generating for a printer that doesn't handle comments and the user
@@ -55,6 +56,9 @@ public class DualStrusionConstruction
 		this.useWipes = useWipes;
 		this.machineType = type;
 		this.seenComment = false;
+		this.pauseOnChange =
+            Base.preferences.getBoolean("dualstrusionwindow.pauseonchange",
+                                        false);
 		if(useWipes)
 		{
 			leftWipe = Base.getMachineLoader().getMachineInterface().getModel().getWipeFor(ToolheadAlias.LEFT);
@@ -261,35 +265,55 @@ public class DualStrusionConstruction
 				result.addAll(wipe(rightWipe));
 		}
 		
-		// Offets deprecated nowadays
-		//result.add(toTool.getRecallOffsetGcodeCommand());
+        final DecimalFormat nf = (DecimalFormat)Base.getGcodeFormat();
+        final Point5d firstPos = getFirstPosition(toLayer);
+		if(firstPos != null)
+		{
+	        firstPos.setZ(getLayerZ(toLayer));
+        }
+
+        if (pauseOnChange)
+        {
+        	if(firstPos != null)
+			{
+	            // move up fairly quickly
+	            result.add("G1 Z" + nf.format(firstPos.z() + 10.0) +" F3000");
+	        }
+            result.add("M72 P2");
+            result.add("M71");
+        }
+		// Offets deprecated nowadays, but this seems to be needed
+		result.add(toTool.getRecallOffsetGcodeCommand());
 		result.add("M108 "+toTool.getTcode() + " (Set tool)");
 		
 		// Ben's suggestion
 		result.add("M18 A B");
 		
-		final DecimalFormat nf = (DecimalFormat)Base.getGcodeFormat();
-		final Point5d firstPos = getFirstPosition(toLayer);
-		firstPos.setZ(getLayerZ(toLayer));
+		        //TODO: catch possible null pointer exceptions?
+        // set the feedrate with an empty G1
+        String feedrate = getFirstFeedrate(toLayer);
+        if(feedrate.equals(""))
+            feedrate = getLastFeedrate(fromLayer);
 		
 		if(firstPos != null)
 		{
 			// The F here is a magic number, you can read about it in the 'wipe()' function
-			// move up fairly quickly
-			result.add("G1 Z" + nf.format(firstPos.z()) +" F3000");
+            if (!pauseOnChange)
+            {
+                // move up fairly quickly
+                result.add("G1 Z" + nf.format(firstPos.z()) +" F3000");
+            }
 			// move to the next point
-			result.add("G1 X" + nf.format(firstPos.x()) + " Y" + nf.format(firstPos.y()) + " Z" + nf.format(firstPos.z()) +" F3000");
+			result.add("G1 X" + nf.format(firstPos.x())
+			           + " Y" + nf.format(firstPos.y())
+			           + " Z" + nf.format(firstPos.z())
+			           + " " + feedrate);
 		}
 //		else
 //		{
 ////			System.err.print(toLayer);
 //		}
 		
-		//TODO: catch possible null pointer exceptions?
-		// set the feedrate with an empty G1
-		String feedrate = getFirstFeedrate(toLayer);
-		if(feedrate.equals(""))
-			feedrate = getLastFeedrate(fromLayer);
 		result.add("G1 " + feedrate);
 
 		
@@ -508,13 +532,16 @@ public class DualStrusionConstruction
 					+ "Please use a standard start.gcode.\n");
 			}
 			ToolheadAlias initialTool;
+            ToolheadAlias otherTool;
 			if(right.get(1).getHeight() < left.get(1).getHeight()) {
 				initialTool = ToolheadAlias.RIGHT;
+				otherTool = ToolheadAlias.LEFT;
 				dominant = (ArrayList<String>)right.pop().getCommands();
 				secondary = (ArrayList<String>)left.pop().getCommands();
 			}
 			else {
 				initialTool = ToolheadAlias.LEFT;
+				otherTool = ToolheadAlias.RIGHT;
 				dominant = (ArrayList<String>)left.pop().getCommands();
 				secondary = (ArrayList<String>)right.pop().getCommands();
 			}
@@ -554,13 +581,12 @@ public class DualStrusionConstruction
 				start.add(dominant.get(0));
 				dominant.remove(0);
 			}
+            start.add("M108 " + otherTool.getTcode() + " (Set tool)");
 			while (!secondary.isEmpty()) {
-				String s = secondary.get(0);
-				if (s.startsWith("(")) {
-					start.add(s);
-				}
+				start.add(secondary.get(0));
 				secondary.remove(0);
 			}
+            start.add("M108 " + initialTool.getTcode() + " (Set tool)");
 			result.add(new Layer(0.0, start));
 		}
 
@@ -627,7 +653,7 @@ public class DualStrusionConstruction
 			{
 				// left has a lower layer, grab it
 				// if last layer tool != next layer tool, add a toolchange
-				if (right.equals(lastLayer)) {
+				if (!left.equals(lastLayer)) {
 					result.add(toolchange(ToolheadAlias.RIGHT, result.getLast(), ToolheadAlias.LEFT, left.peek()));
 				}
 				result.add(left.pop());
@@ -643,8 +669,9 @@ public class DualStrusionConstruction
 			{
 				// right has lower layer
 				// if last layer tool != next layer tool, add a toolchange
-				if (left.equals(lastLayer)) {
+				if (!right.equals(lastLayer)) {
 					result.add(toolchange(ToolheadAlias.LEFT, result.getLast(), ToolheadAlias.RIGHT, right.peek()));
+
 				}
 				result.add(right.pop());
 				lastLayer = right;
@@ -657,7 +684,12 @@ public class DualStrusionConstruction
 			}
 			else //equal height
 			{
-				if ((lastLayer == left) || (lastLayer == null))
+				if (lastLayer == null)
+				{
+					result.add(toolchange(ToolheadAlias.RIGHT, result.getLast(), ToolheadAlias.LEFT, left.peek()));
+					lastLayer = left;
+				}
+				if (lastLayer == left)
 				{
 					if (left.peek().getHeight() == 999999) {
 						ArrayList<String> finish = new ArrayList<String>();
