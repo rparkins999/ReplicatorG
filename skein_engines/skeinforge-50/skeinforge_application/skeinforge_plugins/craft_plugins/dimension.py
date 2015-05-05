@@ -224,6 +224,7 @@ class DimensionSkein:
 			return gcodeText
 		self.restartDistance = self.repository.retractionDistance.value + self.repository.restartExtraDistance.value
 		self.extruderRetractionSpeedMinuteString = self.distanceFeedRate.getRounded(60.0 * self.repository.extruderRetractionSpeed.value)
+		self.firstMove = True
 		for lineIndex in xrange(self.lineIndex, len(self.lines)):
 			self.parseLine( lineIndex )
 		return self.distanceFeedRate.output.getvalue()
@@ -389,8 +390,9 @@ class DimensionSkein:
 			self.layerIndex += 1
 			settings.printProgress(self.layerIndex, 'dimension')
 		elif firstWord == 'M101':
-			if self.totalExtrusionDistance > 0.0:
+			if not self.firstMove:
 				self.addLinearMoveExtrusionDistanceLine(self.restartDistance * self.retractionRatio)
+			self.firstMove = False
 			if self.totalExtrusionDistance > self.repository.maximumEValueBeforeReset.value: 
 				if not self.repository.relativeExtrusionDistance.value:
 					self.distanceFeedRate.addLine('G92 E0')
