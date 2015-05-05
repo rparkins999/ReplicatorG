@@ -153,7 +153,6 @@ class OozebaneSkein:
 		self.operatingFeedRateMinute = 959.0
 		self.shutdownStepIndex = 999999999
 		self.startupStepIndex = 999999999
-		self.EarlyShutdownActive = False
 
 	def addAfterStartupLine( self, splitLine ):
 		"Add the after startup lines."
@@ -168,11 +167,6 @@ class OozebaneSkein:
 			if not self.isCloseToEither( locationBack, location, self.oldLocation ):
 				self.distanceFeedRate.addLine( self.getLinearMoveWithFeedRate( feedRate, locationBack ) )
 		self.startupStepIndex += 1
-
-	def addLineSetShutdowns(self, line):
-		"Add a line and set the shutdown variables."
-		self.distanceFeedRate.addLine(line)
-		self.isShutdownEarly = True
 
 	def getActiveFeedRateRatio(self):
 		"Get the feed rate of the first active move over the operating feed rate."
@@ -239,7 +233,7 @@ class OozebaneSkein:
 				shutdownFlowRateMultiplier = self.getShutdownFlowRateMultiplier( 1.0 - distanceThreadEnd / self.earlyShutdownDistance, len( self.earlyShutdownDistances ) )
 				line = self.getLinearMoveWithFeedRate( self.feedRateMinute * shutdownFlowRateMultiplier, location )
 			self.distanceFeedRate.addLine(line)
-			return False
+			return distanceThreadEnd != None
 		segment = self.oldLocation - location
 		segmentLength = segment.magnitude()
 		distanceBack = self.earlyShutdownDistances[ self.shutdownStepIndex ] - distanceThreadEnd
@@ -251,8 +245,8 @@ class OozebaneSkein:
 				line = self.getLinearMoveWithFeedRate( self.feedRateMinute, locationBack )
 			self.distanceFeedRate.addLine(line)
 			self.distanceFeedRate.addLine("(<EarlyShutdownActive>)")
-			self.EarlyShutdownActive = True
-			self.addLineSetShutdowns('M103')
+			self.distanceFeedRate.addLine('M103')
+			self.isShutdownEarly = True
 			return True
 		if self.isClose( locationBack, self.oldLocation ):
 			return True
@@ -267,9 +261,6 @@ class OozebaneSkein:
 		"Get and / or add the shutdown and slowdown lines."
 		while self.getAddShutSlowDownLine(line):
 			self.shutdownStepIndex += 1
-		if self.EarlyShutdownActive:
-			self.distanceFeedRate.addLine("(<EarlyShutdownFinished>)")
-			self.EarlyShutdownActive = False
 		return ''
 
 	def getCraftedGcode( self, gcodeText, oozebaneRepository ):
@@ -484,6 +475,7 @@ class OozebaneSkein:
 			self.distanceFromThreadEndToThreadBeginning = None
 			self.earlyStartupDistance = None
 			if self.isShutdownEarly:
+				self.distanceFeedRate.addLine("(<EarlyShutdownFinished>)")
 				self.isShutdownEarly = False
 				return
 		self.distanceFeedRate.addLine(line)
