@@ -83,6 +83,7 @@ from skeinforge_application.skeinforge_utilities import skeinforge_craft
 from skeinforge_application.skeinforge_utilities import skeinforge_polyfile
 from skeinforge_application.skeinforge_utilities import skeinforge_profile
 import cStringIO
+import os
 import sys
 import time
 
@@ -179,7 +180,7 @@ class AlterationSkein:
 		self.lines = archive.getTextLines(gcodeText)
 		if repository.replaceVariableWithSetting.value:
 			self.setSettingDictionary()
-		self.distanceFeedRate.addLine('(generated ' +  time.ctime() + ' using profile ' +  skeinforge_profile.getProfileName(skeinforge_profile.getCraftTypeName()) + ')')
+		self.distanceFeedRate.addLine('(generated ' +  time.ctime() + ' using profile ' +  os.path.basename(archive.globalTemporarySettingsPath) + ')')
 		print('Using start file ' + repository.nameOfStartFile.value)
 		self.addFromUpperLowerFile(repository.nameOfStartFile.value) # Add a start file if it exists.
 		self.parseInitialization()

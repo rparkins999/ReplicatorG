@@ -47,6 +47,7 @@ public class DualStrusionConstruction
 	 * don't copy those to the output or put in any of our own.
 	 */
 	private boolean seenComment;
+	private Point5d homePos;
 	
 	public DualStrusionConstruction(File leftFile, File rightFile,
 									MachineType type, boolean useWipes)
@@ -56,6 +57,7 @@ public class DualStrusionConstruction
 		this.useWipes = useWipes;
 		this.machineType = type;
 		this.seenComment = false;
+		this.homePos = null;
 		this.pauseOnChange =
             Base.preferences.getBoolean("dualstrusionwindow.pauseonchange",
                                         false);
@@ -274,13 +276,22 @@ public class DualStrusionConstruction
 
         if (pauseOnChange)
         {
-        	if(firstPos != null)
+        	if (firstPos != null)
 			{
+				if (homePos == null)
+				{
+					homePos = new Point5d();
+					homePos.setY(-70.0);
+				}
 	            // move up fairly quickly
-	            result.add("G1 Z" + nf.format(firstPos.z() + 10.0) +" F3000");
+	            result.add("G1 Y" + nf.format(homePos.y())
+				           + " Z" + nf.format(firstPos.z() + 10.0)
+			               + " F3000");
 	        }
             result.add("M72 P2");
-            result.add("M71");
+            result.add(
+	            "M71 (Wait for oozing to  finish and then      press OK)");
+            result.add("M70 P1 (Continuing...)");
         }
 		// Offets deprecated nowadays, but this seems to be needed
 		result.add(toTool.getRecallOffsetGcodeCommand());
@@ -578,7 +589,13 @@ public class DualStrusionConstruction
 			}
 			start.add("M108 " + initialTool.getTcode() + " (Set tool)");
 			while (!dominant.isEmpty()) {
-				start.add(dominant.get(0));
+				String s = dominant.get(0);
+				if ((homePos == null) && s.startsWith("G0")) {
+					GCodeCommand gcode = new GCodeCommand(s);
+					homePos = new Point5d();
+					homePos.setY(gcode.getCodeValue('Y'));
+				}
+				start.add(s);
 				dominant.remove(0);
 			}
             start.add("M108 " + otherTool.getTcode() + " (Set tool)");
