@@ -423,31 +423,105 @@ public class DualStrusionWindow extends JFrame{
 		
 		return panel;
 	}
-	
+
+	private class myListener implements GeneratorListener {
+		boolean left;
+		ToolpathGenerator gen;
+		myListener(boolean x, ToolpathGenerator g)
+		{
+			left = x;
+			gen = g;
+		}
+		@Override
+		public void updateGenerator(GeneratorEvent evt) {
+			// If config dialog closed and success == false
+			// config canceled
+			if("Config Done".equals(evt.getMessage()) &&
+				(!((SkeinforgeGenerator)evt.getSource()).configSuccess))
+			{
+					System.err.println("DualStrusionWindow 466 aborting");
+					abort("Skeinforge generation canceled.");
+			}
+		}
+		@Override
+		public void generationComplete(GeneratorEvent evt) {
+			if (evt.getCompletion() == Completion.FAILURE)
+			{
+				System.err.println("DualStrusionWindow 471 aborting");
+				abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
+				return;
+			}
+			else if (failure)
+			{
+				System.err.println("DualStrusionWindow 477 aborting");
+				abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
+				return;
+			}
+			if (gen instanceof SkeinforgeGenerator)
+			{
+				SkeinforgeGenerator sfg = (SkeinforgeGenerator)gen;
+				if(left)
+				{
+					Base.preferences.put(
+						"dualstrusionwindow.leftProfile",
+						sfg.getProfile().getFullPath());
+				}
+				else
+				{
+					Base.preferences.put(
+						"dualstrusionwindow.rightProfile",
+						sfg.getProfile().getFullPath());
+				}
+			}
+			completed.countDown();
+			if(completed.getCount() == 0)
+			{
+				combineGcodes();
+			}
+		}
+	}
+
 	/*
 	 * run the selected toolpath generator to convert the stl to gcode,
 	 * skeinforge takes special pre- and post- processing
 	 */
 	private void stlToGcode(File stl, File gcode, ToolheadAlias tool, MachineType machineType)
 	{
+		String lastProfile;
+		SkeinforgePostProcessor spp = null;
+		boolean isLeft = (tool == ToolheadAlias.LEFT);
 		try{
 			if(!gcode.exists())
 				gcode.createNewFile();
 
 			String title = "STL to GCode ";
-			if(tool == ToolheadAlias.LEFT)
+			if(isLeft)
+			{
 				title += "(Left) ";
-			if(tool == ToolheadAlias.RIGHT)
+				lastProfile =
+					Base.preferences.get("dualstrusionwindow.leftProfile", "");
+			}
+			else
+			{
 				title += "(Right) ";
+				lastProfile =
+					Base.preferences.get("dualstrusionwindow.rightProfile", "");
+			}
 			title += "Progress";
 			
 			final JFrame progress = new JFrame(title);
-			final ToolpathGenerator gen = ToolpathGeneratorFactory.createSelectedGenerator();
+			ToolpathGenerator gen =
+				 ToolpathGeneratorFactory.createSelectedGenerator();
 
 			if(gen instanceof SkeinforgeGenerator)
 			{
-				SkeinforgePostProcessor spp = ((SkeinforgeGenerator)gen).getPostProcessor();
-				
+				SkeinforgeGenerator sfg = (SkeinforgeGenerator)gen;
+				sfg.dualStrusion = true;
+				if (!lastProfile.isEmpty())
+				{
+					sfg.setProfile(lastProfile);
+				}
+				spp = sfg.getPostProcessor();
 				spp.enableDualstrusion();
 				spp.setMachineType(machineType);
 				spp.setAddProgressUpdates(false);
@@ -456,42 +530,7 @@ public class DualStrusionWindow extends JFrame{
 			final Build b = new Build(stl.getAbsolutePath());
 			final ToolpathGeneratorThread tgt = new ToolpathGeneratorThread(progress, gen, b);
 
-			tgt.addListener(new GeneratorListener(){
-				@Override
-				public void updateGenerator(GeneratorEvent evt) {
-					// If config dialog closed and success == false
-					// config canceled
-					if("Config Done".equals(evt.getMessage()) &&
-						(!((SkeinforgeGenerator)evt.getSource()).configSuccess))
-					{
-							System.err.println("DualStrusionWindow 466 aborting");
-							abort("Skeinforge generation canceled.");
-					}
-				}
-
-				@Override
-				public void generationComplete(GeneratorEvent evt) {
-					if (evt.getCompletion() == Completion.FAILURE)
-					{
-						System.err.println("DualStrusionWindow 471 aborting");
-						abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
-						return;
-					}
-					else if (failure)
-					{
-						System.err.println("DualStrusionWindow 477 aborting");
-						abort("SkeinForge returned FAILURE - Aborting dualstrusion generation");
-						return;
-					}
-					
-					completed.countDown();
-					if(completed.getCount() == 0)
-					{
-						combineGcodes();
-					}
-				}
-				
-			});
+			tgt.addListener(new myListener(isLeft, gen));
 			if(tool == ToolheadAlias.LEFT)
 				tgt.setDualStrusionSupportFlag(true, 200, 300, stl.getName());
 			else

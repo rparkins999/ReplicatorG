@@ -41,8 +41,9 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 	}
 	
 	public boolean configSuccess = false;
+	public boolean dualStrusion = false;
 	ConfigurationDialog cd;
-	String profile = null;
+	private Profile profile = null;
 	List <SkeinforgePreference> preferences;
 	
 	BuildCode output;
@@ -50,6 +51,22 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 	
 	public SkeinforgeGenerator() {
 		postprocess = new SkeinforgePostProcessor(this);
+	}
+
+	public void setProfile(Profile p) {
+		profile = p;
+		if (!dualStrusion)
+		{
+			Base.preferences.put("lastGeneratorProfileSelected",p.toString());
+		}
+	}
+
+	public void setProfile(String s) {
+		setProfile(new Profile(s));
+	}
+
+	public Profile getProfile() {
+		return profile;
 	}
 
 	public boolean runSanityChecks() {
@@ -75,16 +92,7 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 		return (result == JOptionPane.OK_OPTION);
 	}
 	
-	static public String getSelectedProfile() {
-		String name = Base.preferences.get("replicatorg.skeinforge.profile", "");
-		return name;
-	}
-
-	static public void setSelectedProfile(String name) {
-		Base.preferences.put("replicatorg.skeinforge.profile", name);
-	}
-
-	static class Profile implements Comparable<Profile> {
+	public static class Profile implements Comparable<Profile> {
 		private String fullPath;
 		private String name;
 		// targetMachines is a filter that will allow this profile to only be show for specified machines
@@ -579,7 +587,7 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 		List<String> arguments = new LinkedList<String>();
 		// The -u makes python output unbuffered. Oh joyous day.
 		String[] baseArguments = { PythonUtils.getPythonPath(), "-u",
-				"skeinforge.py", "-p", profile };
+				"skeinforge.py", "-p", profile.getFullPath() };
 		for (String arg : baseArguments) {
 			arguments.add(arg);
 		}
