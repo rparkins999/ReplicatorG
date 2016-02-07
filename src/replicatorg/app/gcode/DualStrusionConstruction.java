@@ -290,7 +290,7 @@ public class DualStrusionConstruction
 	        }
             result.add("M72 P2");
             result.add(
-	            "M71 (Wait for oozing to  finish and then      press OK)");
+	            "M71 (Wait for oozing to  finish and then     press OK)");
             result.add("M70 P1 (Continuing...)");
         }
 		// Offets deprecated nowadays, but this seems to be needed

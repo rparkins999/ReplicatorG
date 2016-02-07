@@ -477,16 +477,32 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 		File newProfDir = new File(getUserProfilesDir(),
 				newName);
 		File oldProfDir = new File(originalProfile.getFullPath());
+		String oldName = oldProfDir.getName();
 		try {
 			Base.copyDir(oldProfDir, newProfDir);
-			Profile newProf = new Profile(newProfDir.getAbsolutePath());
-			editProfile(newProf);
-			return newProf;
 		} catch (IOException ioe) {
 			Base.logger.log(Level.SEVERE,
 					"Couldn't copy directory", ioe);
+			return null;
 		}
-		return null;
+		String subDir = newProfDir.getAbsolutePath() + "/profiles/";
+		File f = new File(subDir + "extrusion.csv");
+		if (f.exists()) {
+			try {
+				String s = Base.loadFile(f);
+				Base.saveFile(s.replace(oldName, newName), f);
+			} catch (IOException ioe) {
+				Base.logger.log(Level.SEVERE,
+						"Couldn't edit extrusion.csv");
+				// We still created the profile, so return it
+			}
+		}
+		subDir = subDir + "extrusion/";
+		f = new File(subDir + oldName);
+		f.renameTo(new File(subDir + newName)); // no IOException possible
+		Profile newProf = new Profile(newProfDir.getAbsolutePath());
+		editProfile(newProf);
+		return newProf;
 	}
 	
 	public void editProfile(Profile profile) {

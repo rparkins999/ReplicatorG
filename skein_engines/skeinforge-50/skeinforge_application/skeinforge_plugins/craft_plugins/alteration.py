@@ -95,7 +95,8 @@ __license__ = 'GNU Affero General Public License http://www.gnu.org/licenses/agp
 
 def getCraftedText(fileName, text='', repository=None):
 	'Alteration a gcode linear move text.'
-	return getCraftedTextFromText(archive.getTextIfEmpty(fileName, text), repository)
+	preamble = '(generated from file ' + fileName + ' )\n'
+	return preamble + getCraftedTextFromText(archive.getTextIfEmpty(fileName, text), repository)
 
 def getCraftedTextFromText(gcodeText, repository=None):
 	'Alteration a gcode linear move text.'
