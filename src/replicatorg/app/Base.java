@@ -681,7 +681,6 @@ public class Base {
 				editor.setLocationByPlatform(true);
 				editor.setVisible(true);
 				checkDirectories();
-				UpdateChecker.checkLatestVersion(editor);
 		    }
 		});
 

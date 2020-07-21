@@ -75,6 +75,9 @@ public class SerialDriver extends DriverBaseImplementation implements UsesSerial
 		try {
 
 			Base.logger.info("Connecting to machine using serial port: " + portName);
+			//rpp...
+			Base.logger.info("Using baud rate " + rate);
+			// ... end
 			newConnection = new Serial(portName, rate, parity, databits, stopbits);
 		} catch (SerialException e) {
 			String msg = e.getMessage();

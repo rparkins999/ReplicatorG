@@ -507,8 +507,9 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 	
 	public void editProfile(Profile profile) {
 		String[] arguments = { PythonUtils.getPythonPath(), "skeinforge.py",
-				"-p", profile.getFullPath() };
+				"-p", profile.getFullPath()};
 		ProcessBuilder pb = new ProcessBuilder(arguments);
+		pb.redirectOutput(new File("/dev/tty"));
 		File skeinforgeDir = getSkeinforgeDir();
 		pb.directory(skeinforgeDir);
 		Process process = null;

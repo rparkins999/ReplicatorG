@@ -19,6 +19,7 @@ import traceback
 import webbrowser
 try:
 	import Tkinter
+	import tkFont
 except:
 	print('You do not have Tkinter, which is needed for the graphical interface, you will only be able to use the command line.')
 	print('Information on how to download Tkinter is at:\nwww.tcl.tk/software/tcltk/')
@@ -190,7 +191,10 @@ def getDisplayedDialogFromConstructor(repository):
 	"Display the repository dialog."
 	try:
 		getReadRepository(repository)
-		return RepositoryDialog( repository, Tkinter.Tk() )
+		tk = Tkinter.Tk()
+		tkFont.nametofont("TkDefaultFont").configure(size=10)
+		tkFont.nametofont("TkMenuFont").configure(size=10)
+		return RepositoryDialog( repository, tk )
 	except:
 		print('this should never happen, getDisplayedDialogFromConstructor in settings could not open')
 		print(repository)
