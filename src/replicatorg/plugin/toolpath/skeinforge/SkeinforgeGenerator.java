@@ -509,7 +509,9 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 		String[] arguments = { PythonUtils.getPythonPath(), "skeinforge.py",
 				"-p", profile.getFullPath()};
 		ProcessBuilder pb = new ProcessBuilder(arguments);
-		pb.redirectOutput(new File("/dev/tty"));
+		File tty = new File("/dev/tty");
+		pb.redirectOutput(tty);
+		pb.redirectError(tty);
 		File skeinforgeDir = getSkeinforgeDir();
 		pb.directory(skeinforgeDir);
 		Process process = null;
