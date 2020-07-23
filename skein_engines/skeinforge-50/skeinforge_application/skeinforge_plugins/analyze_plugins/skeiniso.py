@@ -301,7 +301,7 @@ class SkeinisoRepository( tableau.TableauRepository ):
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.analyze_plugins.skeiniso.html', self)
 		self.baseNameSynonym = 'behold.csv'
 		self.fileNameInput = settings.FileNameInput().getFromFileName( [ ('Gcode text files', '*.gcode') ], 'Open File for Skeiniso', self, '')
-		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeiniso')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromDocumentationSubName('skeinforge_application.skeinforge_plugins.analyze_plugins.skeiniso.html')
 		self.activateSkeiniso = settings.BooleanSetting().getFromValue('Activate Skeiniso', self, False)
 		self.addAnimation()
 		self.axisRulings = settings.BooleanSetting().getFromValue('Axis Rulings', self, True )

@@ -141,8 +141,7 @@ class CoolRepository:
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.cool.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName(
 			fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Cool', self, '')
-		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute(
-			'http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Cool')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromDocumentationSubName('skeinforge_application.skeinforge_plugins.craft_plugins.cool.html')
 		self.activateCool = settings.BooleanSetting().getFromValue('Activate Cool', self, True)
 		self.bridgeCool = settings.FloatSpin().getFromValue(0.0, 'Bridge Cool (Celcius):', self, 10.0, 1.0)
 		self.coolType = settings.MenuButtonDisplay().getFromName('Cool Type:', self)

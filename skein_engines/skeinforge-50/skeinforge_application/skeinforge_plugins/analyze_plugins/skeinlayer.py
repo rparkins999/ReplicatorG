@@ -199,7 +199,7 @@ class SkeinlayerRepository( tableau.TableauRepository ):
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.analyze_plugins.skeinlayer.html', self)
 		self.baseNameSynonym = 'skeinview.csv'
 		self.fileNameInput = settings.FileNameInput().getFromFileName( [ ('Gcode text files', '*.gcode') ], 'Open File for Skeinlayer', self, '')
-		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Skeinlayer')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromDocumentationSubName('skeinforge_application.skeinforge_plugins.analyze_plugins.skeinlayer.html')
 		self.activateSkeinlayer = settings.BooleanSetting().getFromValue('Activate Skeinlayer', self, True )
 		self.addAnimation()
 		self.drawArrows = settings.BooleanSetting().getFromValue('Draw Arrows', self, True )

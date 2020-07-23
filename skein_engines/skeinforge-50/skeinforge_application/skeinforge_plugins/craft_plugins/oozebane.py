@@ -116,7 +116,7 @@ class OozebaneRepository:
 		"Set the default settings, execute title & settings fileName."
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.oozebane.html', self )
 		self.fileNameInput = settings.FileNameInput().getFromFileName( fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Oozebane', self, '')
-		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Oozebane')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromDocumentationSubName('skeinforge_application.skeinforge_plugins.craft_plugins.oozebane.html')
 		self.activateOozebane = settings.BooleanSetting().getFromValue('Activate Oozebane', self, False )
 		self.afterStartupDistance = settings.FloatSpin().getFromValue( 0.7, 'After Startup Distance (millimeters):', self, 1.7, 1.2 )
 		self.earlyShutdownDistance = settings.FloatSpin().getFromValue( 0.7, 'Early Shutdown Distance (millimeters):', self, 1.7, 1.2 )

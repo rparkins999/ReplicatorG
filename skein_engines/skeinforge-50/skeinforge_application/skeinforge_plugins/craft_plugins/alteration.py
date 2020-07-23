@@ -148,7 +148,7 @@ class AlterationRepository:
 		skeinforge_profile.addListsToCraftTypeRepository('skeinforge_application.skeinforge_plugins.craft_plugins.alteration.html', self )
 		self.baseNameSynonym = 'bookend.csv'
 		self.fileNameInput = settings.FileNameInput().getFromFileName(fabmetheus_interpret.getGNUTranslatorGcodeFileTypeTuples(), 'Open File for Alteration', self, '')
-		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromAbsolute('http://fabmetheus.crsndoo.com/wiki/index.php/Skeinforge_Alteration')
+		self.openWikiManualHelpPage = settings.HelpPage().getOpenFromDocumentationSubName('skeinforge_application.skeinforge_plugins.craft_plugins.alteration.html')
 		self.activateAlteration = settings.BooleanSetting().getFromValue('Activate Alteration', self, True)
 		self.nameOfEndFile = settings.StringSetting().getFromValue('Name of End File:', self, 'end.gcode')
 		self.nameOfStartFile = settings.StringSetting().getFromValue('Name of Start File:', self, 'start.gcode')
