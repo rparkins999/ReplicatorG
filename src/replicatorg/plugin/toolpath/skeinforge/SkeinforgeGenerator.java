@@ -509,9 +509,7 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 		String[] arguments = { PythonUtils.getPythonPath(), "skeinforge.py",
 				"-p", profile.getFullPath()};
 		ProcessBuilder pb = new ProcessBuilder(arguments);
-		File tty = new File("/dev/tty");
-		pb.redirectOutput(tty);
-		pb.redirectError(tty);
+		pb.inheritIO();
 		File skeinforgeDir = getSkeinforgeDir();
 		pb.directory(skeinforgeDir);
 		Process process = null;
@@ -574,6 +572,7 @@ public abstract class SkeinforgeGenerator extends ToolpathGenerator {
 			}
 		} catch (IOException ioe) {
 			Base.logger.log(Level.SEVERE, "Could not run skeinforge.", ioe);
+			Base.logger.log(Level.SEVERE, ioe.toString());
 		} catch (InterruptedException e) {
 			// We are most likely shutting down, or the process has been
 			// manually aborted.
